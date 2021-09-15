@@ -1,0 +1,14 @@
+*~
+.idea/
+.bloop/
+.bsp/
+.vscode/
+.metals/
+*.log
+*.raw
+*.floo
+*.mkv
+*.mp4
+target/
+build/
+*.cms
