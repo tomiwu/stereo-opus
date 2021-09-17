@@ -20,26 +20,27 @@ object MinncedTest extends App {
   private val byteOrder   = ByteOrder.BIG_ENDIAN
   private val lengthField = 4
 
-  val input = Path.of("stereo.rtp")
-//  val input    = Path.of("mono.rtp")
-  val output   = Path.of("output.raw")
+//  val input = Path.of("stereo.rtp")
+  val input    = Path.of("mono.rtp")
+  val output   = Path.of("output1.raw")
   val channels = 2
 
   OpusLibrary.loadFromJar()
   val opus = Native.loadLibrary(System.getProperty("opus.lib"), classOf[Opus])
 
-  lazy val fs                          = Sf48000
-  val bufferLen: Int                   = 2880
+  val packet_duration                  = 0.02f
+  val fs                               = Sf48000
+  val frame_size                       = Math.floor(fs() * packet_duration).toInt
+  val bufferLen: Int                   = frame_size * channels
   var fec                              = 0
   var error: IntBuffer                 = IntBuffer.allocate(100)
   lazy val decoder: PointerByReference = opus.opus_decoder_create(fs(), channels, error)
-
-  val decodedBuf = new Array[Float](bufferLen)
+  opus.opus_decoder_init(decoder, fs(), channels);
 
   val buffer = FloatBuffer.allocate(bufferLen)
 
   lazy val dec: Array[Byte] => Array[Float] = in => {
-    opus.opus_decode_float(decoder, in, in.length, buffer, 5760, 0)
+    opus.opus_decode_float(decoder, in, in.length, buffer, frame_size, 0)
     buffer.array()
   }
 
